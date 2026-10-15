@@ -1,5 +1,6 @@
 import { loadState, saveState } from "./storage.js";
 import { createId } from "./utils.js";
+import { rateCard, isDue } from "./srs.js";
 
 const MAX_DECK_NAME_LENGTH = 60;
 
@@ -43,6 +44,24 @@ export function getVisibleCards() {
     return cards.filter(
         (card) => card.front.toLowerCase().includes(query) || card.back.toLowerCase().includes(query)
     );
+}
+
+// Visible cards that are due now, in saved order. Respects the current search.
+export function getDueCards() {
+    const now = Date.now();
+    return getVisibleCards().filter((card) => isDue(card, now));
+}
+
+// Copies the scheduling fields from rateCard() onto the card and saves.
+// Returns the applied fields, or null if the card was not found.
+export function applyRating(deckId, cardId, rating) {
+    const card = (state.cardsByDeckId[deckId] || []).find((item) => item.id === cardId);
+    if (!card) return null;
+
+    const updates = rateCard(card, rating, Date.now());
+    Object.assign(card, updates);
+    save();
+    return updates;
 }
 
 // Returns the result of saveState() so the caller can show an error if saving failed.

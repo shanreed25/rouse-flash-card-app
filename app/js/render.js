@@ -1,10 +1,18 @@
-import { state, ui, getActiveDeck, getActiveCards, getVisibleCards } from "./state.js";
-import { getCurrentCard } from "./study.js";
+import { state, ui, getActiveDeck, getActiveCards, getVisibleCards, getDueCards } from "./state.js";
+import { getCurrentCard, isSessionOver } from "./study.js";
+import { rateCard, getNextDueDate, formatInterval, RATINGS } from "./srs.js";
 
 const LABEL_PREVIEW_LENGTH = 30;
 
-let lastRenderedCardId = null;
-let lastAnnouncedCardId = null;
+const RATING_BUTTONS = [
+    { id: "again-btn", label: "Again", rating: RATINGS.AGAIN },
+    { id: "good-btn", label: "Good", rating: RATINGS.GOOD },
+    { id: "easy-btn", label: "Easy", rating: RATINGS.EASY }
+];
+
+// A card shown at a different position counts as new, so it resets to its front without animating.
+let lastRenderedKey = null;
+let lastAnnouncedKey = null;
 
 export function render() {
     renderSidebar();
@@ -178,32 +186,70 @@ export function renderDeckHeader() {
     document.getElementById("export-deck-btn").disabled = hasNoDeck;
 }
 
+function getEndMessage() {
+    if (ui.view !== "review") return "You've reached the end of this deck.";
+
+    const nextDue = getNextDueDate(getVisibleCards(), Date.now());
+    if (nextDue === null) return "All caught up.";
+    return `All caught up. Next card due on ${new Date(nextDue).toLocaleDateString()}.`;
+}
+
+function getEmptyMessage() {
+    const isNoMatch = getActiveCards().length > 0 && getSearchTerm() !== "" && getVisibleCards().length === 0;
+    if (isNoMatch) return `No cards match '${getSearchTerm()}'.`;
+    if (ui.view === "review") return `No due cards match '${getSearchTerm()}'.`;
+    return "No cards to study.";
+}
+
+// Shows each rating button with the interval it would give the current card.
+function renderRatingControls(card, isFlipped) {
+    document.getElementById("rating-controls").hidden = !isFlipped;
+
+    const now = Date.now();
+    for (const { id, label, rating } of RATING_BUTTONS) {
+        const { interval } = rateCard(card, rating, now);
+        document.getElementById(id).textContent = `${label} · ${formatInterval(interval)}`;
+    }
+}
+
 export function renderStudy() {
     const isStudy = ui.view === "study";
+    const isReview = ui.view === "review";
+    const isSession = isStudy || isReview;
     const studyCard = document.getElementById("study-card");
 
-    document.getElementById("card-list").hidden = isStudy;
-    document.getElementById("cards-heading").hidden = isStudy;
-    document.getElementById("study-view").hidden = !isStudy;
+    document.getElementById("card-list").hidden = isSession;
+    document.getElementById("cards-heading").hidden = isSession;
+    document.getElementById("study-view").hidden = !isSession;
     document.getElementById("shuffle-btn").hidden = !isStudy;
-    document.getElementById("manage-btn").setAttribute("aria-pressed", String(!isStudy));
+    document.getElementById("manage-btn").setAttribute("aria-pressed", String(ui.view === "manage"));
     document.getElementById("study-btn").setAttribute("aria-pressed", String(isStudy));
+    document.getElementById("review-btn").setAttribute("aria-pressed", String(isReview));
     document.getElementById("study-btn").disabled = getVisibleCards().length === 0;
 
-    const card = isStudy ? getCurrentCard() : null;
-    document.getElementById("study-session").hidden = card === null;
-    document.getElementById("study-empty").hidden = !isStudy || card !== null;
+    const dueCount = getDueCards().length;
+    const reviewBtn = document.getElementById("review-btn");
+    reviewBtn.textContent = `Review due (${dueCount})`;
+    reviewBtn.disabled = dueCount === 0;
 
-    const isNoMatch = getActiveCards().length > 0 && getSearchTerm() !== "" && getVisibleCards().length === 0;
-    document.getElementById("study-empty-message").textContent = isNoMatch
-        ? `No cards match '${getSearchTerm()}'.`
-        : "No cards to study.";
+    const isOver = isSessionOver();
+    const card = isSession && !isOver ? getCurrentCard() : null;
+    document.getElementById("study-session").hidden = card === null;
+    document.getElementById("study-end").hidden = !isOver;
+    document.getElementById("study-empty").hidden = !isSession || isOver || card !== null;
+
+    document.getElementById("study-empty-message").textContent = getEmptyMessage();
+    if (isOver) {
+        document.getElementById("study-end-message").textContent = getEndMessage();
+    }
 
     if (card === null) {
-        lastRenderedCardId = null;
-        lastAnnouncedCardId = null;
+        lastRenderedKey = null;
+        lastAnnouncedKey = null;
         return;
     }
+
+    const key = `${ui.study.index}:${card.id}`;
 
     const isFlipped = ui.study.isFlipped;
     const front = document.getElementById("study-front");
@@ -213,25 +259,26 @@ export function renderStudy() {
     front.setAttribute("aria-hidden", String(isFlipped));
     back.setAttribute("aria-hidden", String(!isFlipped));
 
-    if (card.id === lastRenderedCardId) {
+    if (key === lastRenderedKey) {
         studyCard.classList.toggle("is-flipped", isFlipped);
     } else {
         studyCard.classList.add("no-transition");
         studyCard.classList.toggle("is-flipped", isFlipped);
         void studyCard.offsetWidth;
         studyCard.classList.remove("no-transition");
-        lastRenderedCardId = card.id;
+        lastRenderedKey = key;
     }
 
     const total = ui.study.order.length;
     const position = `Card ${ui.study.index + 1} of ${total}`;
     document.getElementById("study-position").textContent = position;
-    document.getElementById("prev-btn").disabled = ui.study.index === 0;
+    document.getElementById("prev-btn").disabled = isReview || ui.study.index === 0;
     document.getElementById("next-btn").disabled = ui.study.index >= total - 1;
     document.getElementById("flip-btn").textContent = isFlipped ? "Show question" : "Show answer";
+    renderRatingControls(card, isFlipped);
 
-    if (card.id !== lastAnnouncedCardId) {
+    if (key !== lastAnnouncedKey) {
         document.getElementById("status-message").textContent = position;
-        lastAnnouncedCardId = card.id;
+        lastAnnouncedKey = key;
     }
 }

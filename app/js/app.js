@@ -16,7 +16,19 @@ import {
     wasLastSaveSuccessful
 } from "./state.js";
 import { render } from "./render.js";
-import { startSession, endSession, flip, next, prev, shuffle, syncSession, rebuildSession } from "./study.js";
+import {
+    startSession,
+    endSession,
+    flip,
+    next,
+    prev,
+    shuffle,
+    syncSession,
+    rebuildSession,
+    rateCurrentCard,
+    isSessionOver
+} from "./study.js";
+import { RATINGS, formatInterval } from "./srs.js";
 import { debounce } from "./utils.js";
 import { openModal, closeModal, confirmAction, isModalOpen } from "./modal.js";
 
@@ -271,12 +283,16 @@ function focusAfterCardDelete(deletedIndex) {
     if (emptyButton) emptyButton.focus();
 }
 
+function isSessionView() {
+    return ui.view === "study" || ui.view === "review";
+}
+
 function applySearch() {
     const query = searchInput.value;
     if (query === ui.searchQuery) return;
 
     ui.searchQuery = query;
-    if (ui.view === "study") rebuildSession();
+    if (isSessionView()) rebuildSession();
     render();
 
     const total = getActiveCards().length;
@@ -290,7 +306,7 @@ function applySearch() {
 function handleClearSearch() {
     searchInput.value = "";
     ui.searchQuery = "";
-    if (ui.view === "study") rebuildSession();
+    if (isSessionView()) rebuildSession();
     render();
     searchInput.focus();
 }
@@ -330,10 +346,48 @@ async function handleCardListClick(event) {
     }
 }
 
-function handleStudyStart() {
-    startSession();
+// The card when a session is running, or the first end-message button when it is over.
+function focusSession() {
+    const targetId = isSessionOver() ? "study-again-btn" : "study-card";
+    document.getElementById(targetId).focus();
+}
+
+function handleSessionStart(mode) {
+    startSession(mode);
     render();
-    document.getElementById("study-card").focus();
+    focusSession();
+    reportSaveFailure();
+}
+
+function handleSessionRestart() {
+    handleSessionStart(ui.view);
+}
+
+function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// Shared by the rating buttons and keys 1, 2, and 3. Only works on a flipped card.
+function handleRating(rating) {
+    if (!isSessionView() || !ui.study.isFlipped) return;
+
+    const updates = rateCurrentCard(rating);
+    if (!updates) return;
+
+    render();
+
+    const label = capitalize(rating);
+    let message =
+        updates.interval === 0
+            ? `Rated ${label}. Due again now.`
+            : `Rated ${label}. Next review in ${formatInterval(updates.interval)}.`;
+    if (isSessionOver()) {
+        message += ` ${document.getElementById("study-end-message").textContent}`;
+    }
+    showStatus(message);
+
+    // The rating buttons just hid, so move focus somewhere that still exists.
+    focusSession();
     reportSaveFailure();
 }
 
@@ -348,19 +402,16 @@ function handleStudyAction(action) {
     render();
 }
 
-// Placeholder. Part 8 adds the scheduling logic.
-function rateCurrentCard(rating) {}
-
 const KEY_ACTIONS = {
     " ": flip,
     ArrowRight: next,
     ArrowLeft: prev
 };
 
-const KEY_RATINGS = { "1": "again", "2": "good", "3": "easy" };
+const KEY_RATINGS = { "1": RATINGS.AGAIN, "2": RATINGS.GOOD, "3": RATINGS.EASY };
 
 function handleKeydown(event) {
-    if (ui.view !== "study" && ui.view !== "review") return;
+    if (!isSessionView()) return;
     if (isModalOpen()) return;
     if (event.ctrlKey || event.altKey || event.metaKey) return;
 
@@ -380,7 +431,7 @@ function handleKeydown(event) {
     const rating = KEY_RATINGS[event.key];
     if (rating && ui.study.isFlipped) {
         event.preventDefault();
-        handleStudyAction(() => rateCurrentCard(rating));
+        handleRating(rating);
     }
 }
 
@@ -421,9 +472,15 @@ function init() {
         }
     });
 
-    document.getElementById("study-btn").addEventListener("click", handleStudyStart);
+    document.getElementById("study-btn").addEventListener("click", () => handleSessionStart("study"));
+    document.getElementById("review-btn").addEventListener("click", () => handleSessionStart("review"));
     document.getElementById("manage-btn").addEventListener("click", handleStudyEnd);
     document.getElementById("study-empty-manage-btn").addEventListener("click", handleStudyEnd);
+    document.getElementById("study-end-manage-btn").addEventListener("click", handleStudyEnd);
+    document.getElementById("study-again-btn").addEventListener("click", handleSessionRestart);
+    document.getElementById("again-btn").addEventListener("click", () => handleRating(RATINGS.AGAIN));
+    document.getElementById("good-btn").addEventListener("click", () => handleRating(RATINGS.GOOD));
+    document.getElementById("easy-btn").addEventListener("click", () => handleRating(RATINGS.EASY));
     document.getElementById("study-card").addEventListener("click", () => handleStudyAction(flip));
     document.getElementById("flip-btn").addEventListener("click", () => handleStudyAction(flip));
     document.getElementById("prev-btn").addEventListener("click", () => handleStudyAction(prev));
