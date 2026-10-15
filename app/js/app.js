@@ -7,6 +7,10 @@ import {
     addDeck,
     renameDeck,
     deleteDeck,
+    validateCard,
+    addCard,
+    updateCard,
+    deleteCard,
     wasLastSaveSuccessful
 } from "./state.js";
 import { render } from "./render.js";
@@ -16,6 +20,12 @@ const deckModal = document.getElementById("deck-modal");
 const deckForm = document.getElementById("deck-form");
 const deckNameInput = document.getElementById("deck-name-input");
 const deckNameError = document.getElementById("deck-name-error");
+const cardModal = document.getElementById("card-modal");
+const cardForm = document.getElementById("card-form");
+const cardFrontInput = document.getElementById("card-front-input");
+const cardBackInput = document.getElementById("card-back-input");
+const cardFrontError = document.getElementById("card-front-error");
+const cardBackError = document.getElementById("card-back-error");
 const deckSidebar = document.getElementById("deck-sidebar");
 const decksToggleBtn = document.getElementById("decks-toggle-btn");
 
@@ -151,6 +161,128 @@ function handleDeckListClick(event) {
     }
 }
 
+function setCardFieldError(input, errorEl, message) {
+    if (message) {
+        errorEl.textContent = message;
+        errorEl.hidden = false;
+        input.setAttribute("aria-invalid", "true");
+    } else {
+        errorEl.textContent = "";
+        errorEl.hidden = true;
+        input.removeAttribute("aria-invalid");
+    }
+}
+
+function openCardModal(mode, openerEl, card) {
+    if (!getActiveDeck()) return;
+
+    cardForm.reset();
+    setCardFieldError(cardFrontInput, cardFrontError, null);
+    setCardFieldError(cardBackInput, cardBackError, null);
+    cardForm.dataset.mode = mode;
+    cardForm.dataset.cardId = card ? card.id : "";
+
+    document.getElementById("card-modal-title").textContent = card ? "Edit Card" : "New Card";
+    document.getElementById("card-save-btn").textContent = card ? "Save" : "Add Card";
+    cardFrontInput.value = card ? card.front : "";
+    cardBackInput.value = card ? card.back : "";
+
+    openModal(cardModal, openerEl);
+}
+
+// Looks up a card button by data-id after a re-render has replaced the old buttons.
+function findCardButton(action, cardId) {
+    const buttons = document.querySelectorAll(`#card-list [data-action="${action}"]`);
+    return Array.from(buttons).find((button) => button.dataset.id === cardId) || null;
+}
+
+function handleCardSubmit(event) {
+    event.preventDefault();
+
+    const deck = getActiveDeck();
+    if (!deck) return;
+
+    const errors = validateCard(cardFrontInput.value, cardBackInput.value);
+    setCardFieldError(cardFrontInput, cardFrontError, errors.front);
+    setCardFieldError(cardBackInput, cardBackError, errors.back);
+    if (errors.front) {
+        cardFrontInput.focus();
+        return;
+    }
+    if (errors.back) {
+        cardBackInput.focus();
+        return;
+    }
+
+    const isEdit = cardForm.dataset.mode === "edit";
+    const cardId = cardForm.dataset.cardId;
+
+    if (isEdit) {
+        updateCard(deck.id, cardId, cardFrontInput.value, cardBackInput.value);
+        showStatus("Card updated.");
+    } else {
+        addCard(deck.id, cardFrontInput.value, cardBackInput.value);
+        showStatus("Card added.");
+    }
+
+    closeModal(cardModal);
+    render();
+    reportSaveFailure();
+
+    // The old Edit button was replaced by render(), so focus the new one for the same card.
+    if (isEdit) {
+        const editButton = findCardButton("edit-card", cardId);
+        if (editButton) editButton.focus();
+    }
+}
+
+function handleCardFormKeydown(event) {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+        event.preventDefault();
+        cardForm.requestSubmit();
+    }
+}
+
+// Moves focus to the Edit button that takes the deleted card's place, else the empty-state button.
+function focusAfterCardDelete(deletedIndex) {
+    const editButtons = document.querySelectorAll('#card-list [data-action="edit-card"]');
+    if (editButtons.length > 0) {
+        editButtons[Math.min(deletedIndex, editButtons.length - 1)].focus();
+        return;
+    }
+    const emptyButton = document.getElementById("empty-new-card-btn");
+    if (emptyButton) emptyButton.focus();
+}
+
+async function handleCardListClick(event) {
+    if (event.target.closest("#empty-new-card-btn")) {
+        openCardModal("create", document.getElementById("empty-new-card-btn"));
+        return;
+    }
+
+    const target = event.target.closest("[data-action]");
+    const deck = getActiveDeck();
+    if (!target || !deck) return;
+
+    const cardId = target.dataset.id;
+    const cards = getActiveCards();
+    const cardIndex = cards.findIndex((card) => card.id === cardId);
+    if (cardIndex === -1) return;
+
+    if (target.dataset.action === "edit-card") {
+        openCardModal("edit", target, cards[cardIndex]);
+    } else if (target.dataset.action === "delete-card") {
+        const confirmed = await confirmAction("Delete this card? This cannot be undone.");
+        if (!confirmed) return;
+
+        deleteCard(deck.id, cardId);
+        render();
+        showStatus("Card deleted.");
+        reportSaveFailure();
+        focusAfterCardDelete(cardIndex);
+    }
+}
+
 function handleDecksToggle() {
     const isOpen = deckSidebar.classList.toggle("is-open");
     decksToggleBtn.setAttribute("aria-expanded", String(isOpen));
@@ -170,6 +302,14 @@ function init() {
     deckForm.addEventListener("submit", handleDeckSubmit);
     document.getElementById("deck-cancel-btn").addEventListener("click", () => closeModal(deckModal));
     decksToggleBtn.addEventListener("click", handleDecksToggle);
+
+    document.getElementById("new-card-btn").addEventListener("click", (event) => {
+        openCardModal("create", event.currentTarget);
+    });
+    document.getElementById("card-list").addEventListener("click", handleCardListClick);
+    cardForm.addEventListener("submit", handleCardSubmit);
+    cardForm.addEventListener("keydown", handleCardFormKeydown);
+    document.getElementById("card-cancel-btn").addEventListener("click", () => closeModal(cardModal));
 }
 
 init();

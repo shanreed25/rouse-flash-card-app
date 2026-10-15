@@ -75,38 +75,7 @@
 
             <section aria-labelledby="cards-heading">
                 <h2 id="cards-heading" class="visually-hidden">Cards</h2>
-                <ul id="card-list">
-                    <li class="card-item">
-                        <div class="card-text">
-                            <p class="card-side"><span class="card-label">Front</span> hablar</p>
-                            <p class="card-side"><span class="card-label">Back</span> to speak</p>
-                        </div>
-                        <div class="card-actions">
-                            <button type="button" data-action="edit-card" data-id="card-1" aria-label="Edit card hablar">Edit</button>
-                            <button type="button" data-action="delete-card" data-id="card-1" aria-label="Delete card hablar">Delete</button>
-                        </div>
-                    </li>
-                    <li class="card-item">
-                        <div class="card-text">
-                            <p class="card-side"><span class="card-label">Front</span> comer</p>
-                            <p class="card-side"><span class="card-label">Back</span> to eat</p>
-                        </div>
-                        <div class="card-actions">
-                            <button type="button" data-action="edit-card" data-id="card-2" aria-label="Edit card comer">Edit</button>
-                            <button type="button" data-action="delete-card" data-id="card-2" aria-label="Delete card comer">Delete</button>
-                        </div>
-                    </li>
-                    <li class="card-item">
-                        <div class="card-text">
-                            <p class="card-side"><span class="card-label">Front</span> vivir</p>
-                            <p class="card-side"><span class="card-label">Back</span> to live</p>
-                        </div>
-                        <div class="card-actions">
-                            <button type="button" data-action="edit-card" data-id="card-3" aria-label="Edit card vivir">Edit</button>
-                            <button type="button" data-action="delete-card" data-id="card-3" aria-label="Delete card vivir">Delete</button>
-                        </div>
-                    </li>
-                </ul>
+                <ul id="card-list"></ul>
             </section>
         </main>
     </div>
@@ -129,6 +98,27 @@
             <div class="dialog-actions">
                 <button type="button" id="deck-cancel-btn">Cancel</button>
                 <button type="submit" id="deck-save-btn">Create</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="card-modal" aria-labelledby="card-modal-title">
+        <form id="card-form" novalidate>
+            <h2 id="card-modal-title">New Card</h2>
+            <div class="form-field">
+                <label for="card-front-input">Front</label>
+                <textarea id="card-front-input" rows="3" aria-describedby="card-front-error card-form-hint"></textarea>
+                <p id="card-front-error" class="field-error" hidden></p>
+            </div>
+            <div class="form-field">
+                <label for="card-back-input">Back</label>
+                <textarea id="card-back-input" rows="3" aria-describedby="card-back-error card-form-hint"></textarea>
+                <p id="card-back-error" class="field-error" hidden></p>
+            </div>
+            <p id="card-form-hint" class="form-hint">Press Ctrl+Enter (Cmd+Enter on Mac) to save</p>
+            <div class="dialog-actions">
+                <button type="button" id="card-cancel-btn">Cancel</button>
+                <button type="submit" id="card-save-btn">Add Card</button>
             </div>
         </form>
     </dialog>

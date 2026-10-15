@@ -169,9 +169,9 @@ Rules that keep the version 2 swap small:
 | Deck header | `deck-title`, `edit-deck-btn`, `delete-deck-btn`, `export-deck-btn`, `import-deck-btn`, `import-file-input` |
 | Stats | `deck-stats` |
 | Toolbar | `search-input`, `match-count`, `new-card-btn`, `study-btn`, `review-btn`, `manage-btn`, `shuffle-btn` |
-| Card list | `card-list`, `cards-heading` (visually hidden) |
+| Card list | `card-list`, `cards-heading` (visually hidden), `empty-new-card-btn` (card empty state) |
 | Study | `study-view`, `study-card`, `study-front`, `study-back`, `study-position`, `flip-btn`, `prev-btn`, `next-btn`, `rating-controls`, `again-btn`, `good-btn`, `easy-btn` |
-| Modals | `deck-modal`, `deck-modal-title`, `deck-form`, `deck-name-input`, `deck-name-error`, `deck-cancel-btn`, `deck-save-btn`, `confirm-modal-title`, `card-modal`, `card-form`, `card-front-input`, `card-back-input`, `confirm-modal`, `confirm-message`, `confirm-ok-btn`, `confirm-cancel-btn` |
+| Modals | `deck-modal`, `deck-modal-title`, `deck-form`, `deck-name-input`, `deck-name-error`, `deck-cancel-btn`, `deck-save-btn`, `confirm-modal-title`, `card-modal-title`, `card-front-error`, `card-back-error`, `card-form-hint`, `card-cancel-btn`, `card-save-btn`, `card-modal`, `card-form`, `card-front-input`, `card-back-input`, `confirm-modal`, `confirm-message`, `confirm-ok-btn`, `confirm-cancel-btn` |
 | Messages | `status-message` (aria-live polite), `error-message` (aria-live assertive) |
 | Footer | `app-footer` |
 
@@ -183,7 +183,7 @@ If a new ID or class is needed, add it to this table in the same part.
 | --- | --- |
 | Utility | `visually-hidden` |
 | State | `is-active`, `is-open` (mobile deck list expanded) (see section 7 for other `is-` classes) |
-| Modals and forms | `dialog-actions`, `form-field`, `field-error` |
+| Modals and forms | `dialog-actions`, `form-field`, `field-error`, `form-hint` |
 | Empty state | `empty-state` |
 | Header | `app-name` |
 | Layout | `app-layout` |
@@ -191,7 +191,7 @@ If a new ID or class is needed, add it to this table in the same part.
 | Deck header | `deck-header`, `deck-actions` |
 | Stats | `stats-list`, `stat` |
 | Toolbar | `toolbar`, `search-group`, `toolbar-actions` |
-| Card list | `card-item`, `card-text`, `card-side`, `card-label`, `card-actions` |
+| Card list | `card-item`, `card-text`, `card-side`, `card-label`, `card-text-value`, `card-actions` |
 
 ## 8. Layout and Design
 
