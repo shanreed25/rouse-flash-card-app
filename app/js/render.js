@@ -1,4 +1,4 @@
-import { state, ui, getActiveDeck, getActiveCards } from "./state.js";
+import { state, ui, getActiveDeck, getActiveCards, getVisibleCards } from "./state.js";
 import { getCurrentCard } from "./study.js";
 
 const LABEL_PREVIEW_LENGTH = 30;
@@ -9,6 +9,7 @@ let lastAnnouncedCardId = null;
 export function render() {
     renderSidebar();
     renderDeckHeader();
+    renderToolbar();
     renderCardList();
     renderStudy();
 }
@@ -45,6 +46,26 @@ function createCardButton(action, label, card) {
     return button;
 }
 
+// Never sets #search-input's value, so it cannot overwrite what the user is typing.
+export function renderToolbar() {
+    const hasDeck = getActiveDeck() !== null;
+    document.getElementById("search-input").disabled = !hasDeck;
+
+    const total = getActiveCards().length;
+    const matchCount = document.getElementById("match-count");
+    if (!hasDeck) {
+        matchCount.textContent = "";
+    } else if (getSearchTerm() !== "") {
+        matchCount.textContent = `${getVisibleCards().length} of ${total} cards`;
+    } else {
+        matchCount.textContent = `${total} cards`;
+    }
+}
+
+function getSearchTerm() {
+    return ui.searchQuery.trim();
+}
+
 export function renderCardList() {
     const cardList = document.getElementById("card-list");
     const hasDeck = getActiveDeck() !== null;
@@ -53,7 +74,25 @@ export function renderCardList() {
 
     if (!hasDeck) return;
 
-    const cards = getActiveCards();
+    const totalCards = getActiveCards().length;
+    const cards = getVisibleCards();
+    if (totalCards > 0 && cards.length === 0) {
+        const item = document.createElement("li");
+        item.className = "empty-state";
+
+        const message = document.createElement("p");
+        message.textContent = `No cards match '${getSearchTerm()}'.`;
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.id = "clear-search-btn";
+        button.textContent = "Clear search";
+
+        item.append(message, button);
+        cardList.append(item);
+        return;
+    }
+
     if (cards.length === 0) {
         const item = document.createElement("li");
         item.className = "empty-state";
@@ -149,11 +188,16 @@ export function renderStudy() {
     document.getElementById("shuffle-btn").hidden = !isStudy;
     document.getElementById("manage-btn").setAttribute("aria-pressed", String(!isStudy));
     document.getElementById("study-btn").setAttribute("aria-pressed", String(isStudy));
-    document.getElementById("study-btn").disabled = getActiveCards().length === 0;
+    document.getElementById("study-btn").disabled = getVisibleCards().length === 0;
 
     const card = isStudy ? getCurrentCard() : null;
     document.getElementById("study-session").hidden = card === null;
     document.getElementById("study-empty").hidden = !isStudy || card !== null;
+
+    const isNoMatch = getActiveCards().length > 0 && getSearchTerm() !== "" && getVisibleCards().length === 0;
+    document.getElementById("study-empty-message").textContent = isNoMatch
+        ? `No cards match '${getSearchTerm()}'.`
+        : "No cards to study.";
 
     if (card === null) {
         lastRenderedCardId = null;

@@ -35,6 +35,16 @@ export function getActiveCards() {
     return state.cardsByDeckId[state.activeDeckId] || [];
 }
 
+// Active deck's cards filtered by ui.searchQuery. Read-only: returns a new array and never saves.
+export function getVisibleCards() {
+    const query = ui.searchQuery.trim().toLowerCase();
+    const cards = getActiveCards();
+    if (query === "") return cards.slice();
+    return cards.filter(
+        (card) => card.front.toLowerCase().includes(query) || card.back.toLowerCase().includes(query)
+    );
+}
+
 // Returns the result of saveState() so the caller can show an error if saving failed.
 export function setActiveDeck(deckId) {
     if (!state.decks.some((deck) => deck.id === deckId)) {

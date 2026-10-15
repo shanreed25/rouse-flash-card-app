@@ -3,6 +3,7 @@ import {
     ui,
     getActiveDeck,
     getActiveCards,
+    getVisibleCards,
     setActiveDeck,
     validateDeckName,
     addDeck,
@@ -15,7 +16,8 @@ import {
     wasLastSaveSuccessful
 } from "./state.js";
 import { render } from "./render.js";
-import { startSession, endSession, flip, next, prev, shuffle, syncSession } from "./study.js";
+import { startSession, endSession, flip, next, prev, shuffle, syncSession, rebuildSession } from "./study.js";
+import { debounce } from "./utils.js";
 import { openModal, closeModal, confirmAction, isModalOpen } from "./modal.js";
 
 const deckModal = document.getElementById("deck-modal");
@@ -30,6 +32,7 @@ const cardFrontError = document.getElementById("card-front-error");
 const cardBackError = document.getElementById("card-back-error");
 const deckSidebar = document.getElementById("deck-sidebar");
 const decksToggleBtn = document.getElementById("decks-toggle-btn");
+const searchInput = document.getElementById("search-input");
 
 function showStatus(message) {
     document.getElementById("status-message").textContent = message;
@@ -100,6 +103,7 @@ function handleDeckSubmit(event) {
         showStatus(`Deck renamed to ${trimmed}.`);
     } else {
         addDeck(trimmed);
+        searchInput.value = "";
         collapseDeckList();
         showStatus(`Deck ${trimmed} created.`);
     }
@@ -136,6 +140,7 @@ async function handleDeleteDeck() {
 
     const deletedIndex = state.decks.findIndex((item) => item.id === deck.id);
     deleteDeck(deck.id);
+    searchInput.value = "";
     render();
     showStatus(`Deck ${deck.name} deleted.`);
     reportSaveFailure();
@@ -153,6 +158,7 @@ function handleDeckListClick(event) {
 
     if (target.dataset.action === "select-deck") {
         setActiveDeck(target.dataset.id);
+        searchInput.value = "";
         reportSaveFailure();
         render();
 
@@ -219,12 +225,19 @@ function handleCardSubmit(event) {
     const isEdit = cardForm.dataset.mode === "edit";
     const cardId = cardForm.dataset.cardId;
 
+    let savedId = cardId;
     if (isEdit) {
         updateCard(deck.id, cardId, cardFrontInput.value, cardBackInput.value);
-        showStatus("Card updated.");
     } else {
-        addCard(deck.id, cardFrontInput.value, cardBackInput.value);
-        showStatus("Card added.");
+        const card = addCard(deck.id, cardFrontInput.value, cardBackInput.value);
+        savedId = card ? card.id : null;
+    }
+
+    const isHidden = !getVisibleCards().some((card) => card.id === savedId);
+    if (isHidden) {
+        showStatus("Card saved. It's hidden by the current search.");
+    } else {
+        showStatus(isEdit ? "Card updated." : "Card added.");
     }
 
     closeModal(cardModal);
@@ -253,11 +266,41 @@ function focusAfterCardDelete(deletedIndex) {
         editButtons[Math.min(deletedIndex, editButtons.length - 1)].focus();
         return;
     }
-    const emptyButton = document.getElementById("empty-new-card-btn");
+    const emptyButton =
+        document.getElementById("empty-new-card-btn") || document.getElementById("clear-search-btn");
     if (emptyButton) emptyButton.focus();
 }
 
+function applySearch() {
+    const query = searchInput.value;
+    if (query === ui.searchQuery) return;
+
+    ui.searchQuery = query;
+    if (ui.view === "study") rebuildSession();
+    render();
+
+    const total = getActiveCards().length;
+    if (query.trim() === "") {
+        showStatus(`${total} cards`);
+    } else {
+        showStatus(`${getVisibleCards().length} of ${total} cards match`);
+    }
+}
+
+function handleClearSearch() {
+    searchInput.value = "";
+    ui.searchQuery = "";
+    if (ui.view === "study") rebuildSession();
+    render();
+    searchInput.focus();
+}
+
 async function handleCardListClick(event) {
+    if (event.target.closest("#clear-search-btn")) {
+        handleClearSearch();
+        return;
+    }
+
     if (event.target.closest("#empty-new-card-btn")) {
         openCardModal("create", document.getElementById("empty-new-card-btn"));
         return;
@@ -269,11 +312,11 @@ async function handleCardListClick(event) {
 
     const cardId = target.dataset.id;
     const cards = getActiveCards();
-    const cardIndex = cards.findIndex((card) => card.id === cardId);
-    if (cardIndex === -1) return;
+    if (!cards.some((card) => card.id === cardId)) return;
+    const cardIndex = getVisibleCards().findIndex((card) => card.id === cardId);
 
     if (target.dataset.action === "edit-card") {
-        openCardModal("edit", target, cards[cardIndex]);
+        openCardModal("edit", target, cards.find((card) => card.id === cardId));
     } else if (target.dataset.action === "delete-card") {
         const confirmed = await confirmAction("Delete this card? This cannot be undone.");
         if (!confirmed) return;
@@ -368,6 +411,15 @@ function init() {
     cardForm.addEventListener("submit", handleCardSubmit);
     cardForm.addEventListener("keydown", handleCardFormKeydown);
     document.getElementById("card-cancel-btn").addEventListener("click", () => closeModal(cardModal));
+
+    const debouncedSearch = debounce(applySearch, 300);
+    searchInput.addEventListener("input", () => {
+        if (searchInput.value.trim() === "") {
+            applySearch();
+        } else {
+            debouncedSearch();
+        }
+    });
 
     document.getElementById("study-btn").addEventListener("click", handleStudyStart);
     document.getElementById("manage-btn").addEventListener("click", handleStudyEnd);

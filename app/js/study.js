@@ -1,8 +1,16 @@
-import { ui, getActiveDeck, getActiveCards, markDeckStudied } from "./state.js";
+import { ui, getActiveDeck, getVisibleCards, markDeckStudied } from "./state.js";
 
-// All session building goes through here so Part 7 can add search filtering in one place.
+// All session building goes through here so search filtering applies in one place.
 export function getSessionCards() {
-    return getActiveCards().slice();
+    return getVisibleCards();
+}
+
+// Rebuilds the order after the search query changes. Stays in the current view and
+// does not mark the deck as studied.
+export function rebuildSession() {
+    ui.study.order = getSessionCards().map((card) => card.id);
+    ui.study.index = 0;
+    ui.study.isFlipped = false;
 }
 
 export function startSession() {
