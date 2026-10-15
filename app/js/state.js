@@ -211,3 +211,61 @@ export function markDeckStudied(deckId) {
     deck.lastStudiedAt = Date.now();
     save();
 }
+
+// Returns name if no deck uses it (case-insensitive), else "Name (imported)", "Name (imported 2)", ...
+// The base name is shortened so the result stays within MAX_DECK_NAME_LENGTH.
+export function getUniqueDeckName(name) {
+    const isTaken = (candidate) =>
+        state.decks.some((deck) => deck.name.toLowerCase() === candidate.toLowerCase());
+    if (!isTaken(name)) return name;
+
+    for (let n = 1; ; n += 1) {
+        const suffix = n === 1 ? " (imported)" : ` (imported ${n})`;
+        const base = name.slice(0, MAX_DECK_NAME_LENGTH - suffix.length).trimEnd();
+        const candidate = base + suffix;
+        if (!isTaken(candidate)) return candidate;
+    }
+}
+
+// Creates a deck from parsed cards, makes it active, and saves once.
+// Returns { ok: true, deckName, count } or { ok: false, error }. On a failed save, nothing is kept.
+export function importDeck(name, cards) {
+    const now = Date.now();
+    const previousActiveDeckId = state.activeDeckId;
+    const previousView = ui.view;
+    const previousSearchQuery = ui.searchQuery;
+
+    const deck = {
+        id: createId(),
+        name: getUniqueDeckName(name),
+        createdAt: now,
+        updatedAt: now,
+        lastStudiedAt: null
+    };
+    state.decks.push(deck);
+    state.cardsByDeckId[deck.id] = cards.map((card) => ({
+        id: createId(),
+        front: card.front,
+        back: card.back,
+        createdAt: now,
+        updatedAt: now,
+        dueAt: card.dueAt,
+        interval: card.interval,
+        reviewCount: card.reviewCount,
+        lapses: card.lapses,
+        lastReviewedAt: card.lastReviewedAt
+    }));
+    state.activeDeckId = deck.id;
+    ui.view = "manage";
+    ui.searchQuery = "";
+
+    if (!save()) {
+        state.decks = state.decks.filter((item) => item.id !== deck.id);
+        delete state.cardsByDeckId[deck.id];
+        state.activeDeckId = previousActiveDeckId;
+        ui.view = previousView;
+        ui.searchQuery = previousSearchQuery;
+        return { ok: false, error: "Could not save the imported deck. Storage may be full or blocked." };
+    }
+    return { ok: true, deckName: deck.name, count: cards.length };
+}

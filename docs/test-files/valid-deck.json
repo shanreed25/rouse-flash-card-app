@@ -1,0 +1,13 @@
+{
+  "format": "flashcards-app-deck",
+  "version": 1,
+  "exportedAt": 1760000000000,
+  "deck": { "name": "Spanish Verbs" },
+  "cards": [
+    { "front": "hablar", "back": "to speak", "dueAt": 1760000000000, "interval": 2, "reviewCount": 3, "lapses": 0, "lastReviewedAt": 1759900000000 },
+    { "front": "comer", "back": "to eat", "dueAt": 1760500000000, "interval": 8, "reviewCount": 5, "lapses": 1, "lastReviewedAt": 1759800000000 },
+    { "front": "vivir", "back": "to live" },
+    { "front": "beber", "back": "to drink", "dueAt": 1760000000000, "interval": 1, "reviewCount": 1, "lapses": 0, "lastReviewedAt": 1759950000000 },
+    { "front": "escribir", "back": "to write" }
+  ]
+}

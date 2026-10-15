@@ -1,0 +1,13 @@
+{
+  "format": "flashcards-app-deck",
+  "version": 1,
+  "exportedAt": 1760000000000,
+  "deck": { "name": "Some Bad Cards" },
+  "cards": [
+    { "front": "one", "back": "uno" },
+    { "front": "", "back": "empty front" },
+    { "front": "two", "back": "dos", "interval": 3, "dueAt": 1760000000000, "reviewCount": 2, "lapses": 0, "lastReviewedAt": null },
+    { "front": "no back" },
+    { "front": "three", "back": "tres" }
+  ]
+}

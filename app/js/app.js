@@ -30,6 +30,7 @@ import {
 } from "./study.js";
 import { RATINGS, formatInterval } from "./srs.js";
 import { debounce } from "./utils.js";
+import { exportDeck, importDeckFile } from "./io.js";
 import { openModal, closeModal, confirmAction, isModalOpen } from "./modal.js";
 
 const deckModal = document.getElementById("deck-modal");
@@ -435,6 +436,36 @@ function handleKeydown(event) {
     }
 }
 
+function handleExport() {
+    const deck = getActiveDeck();
+    if (!deck) return;
+    exportDeck(deck.id);
+    showStatus(`Exported '${deck.name}'.`);
+}
+
+async function handleImportFileChange(event) {
+    const input = event.currentTarget;
+    const file = input.files[0];
+    if (!file) return;
+
+    try {
+        showError("");
+        const result = await importDeckFile(file);
+        if (!result.ok) {
+            showError(result.error);
+            return;
+        }
+        searchInput.value = "";
+        collapseDeckList();
+        render();
+        const cardWord = result.count === 1 ? "card" : "cards";
+        const skippedPart = result.skipped > 0 ? ` (${result.skipped} skipped)` : "";
+        showStatus(`Imported '${result.deckName}': ${result.count} ${cardWord}${skippedPart}.`);
+    } finally {
+        input.value = "";
+    }
+}
+
 function handleDecksToggle() {
     const isOpen = deckSidebar.classList.toggle("is-open");
     decksToggleBtn.setAttribute("aria-expanded", String(isOpen));
@@ -459,6 +490,11 @@ function init() {
     deckForm.addEventListener("submit", handleDeckSubmit);
     document.getElementById("deck-cancel-btn").addEventListener("click", () => closeModal(deckModal));
     decksToggleBtn.addEventListener("click", handleDecksToggle);
+
+    const importFileInput = document.getElementById("import-file-input");
+    document.getElementById("export-deck-btn").addEventListener("click", handleExport);
+    document.getElementById("import-deck-btn").addEventListener("click", () => importFileInput.click());
+    importFileInput.addEventListener("change", handleImportFileChange);
 
     document.getElementById("new-card-btn").addEventListener("click", (event) => {
         openCardModal("create", event.currentTarget);

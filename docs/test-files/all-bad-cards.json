@@ -1,0 +1,13 @@
+{
+  "format": "flashcards-app-deck",
+  "version": 1,
+  "exportedAt": 1760000000000,
+  "deck": { "name": "All Bad Cards" },
+  "cards": [
+    { "front": "", "back": "x" },
+    { "front": "x", "back": "   " },
+    { "front": 5, "back": "x" },
+    { "back": "no front" },
+    "not an object"
+  ]
+}
