@@ -167,7 +167,7 @@ Rules that keep the version 2 swap small:
 | Header | `app-header`, `new-deck-btn` |
 | Sidebar | `deck-sidebar`, `deck-list`, `decks-toggle-btn` (mobile only), `decks-heading`, `empty-new-deck-btn` (deck empty state) |
 | Deck header | `deck-title`, `edit-deck-btn`, `delete-deck-btn`, `export-deck-btn`, `import-deck-btn`, `import-file-input` |
-| Stats | `deck-stats` |
+| Stats | `deck-stats`, `stats-progress` (the `<progress>` element), `stats-progress-label`, `stats-empty` (no-cards message) |
 | Toolbar | `search-input`, `match-count`, `new-card-btn`, `study-btn`, `review-btn`, `manage-btn`, `shuffle-btn` |
 | Card list | `card-list`, `cards-heading` (visually hidden), `empty-new-card-btn` (card empty state), `clear-search-btn` (no-match state) |
 | Study | `study-view`, `study-card`, `study-front`, `study-back`, `study-position`, `flip-btn`, `prev-btn`, `next-btn`, `rating-controls`, `again-btn`, `good-btn`, `easy-btn`, `study-session`, `study-empty`, `study-empty-message`, `study-empty-manage-btn`, `study-end` (end-of-session message), `study-end-message`, `study-again-btn`, `study-end-manage-btn` |
@@ -190,7 +190,7 @@ If a new ID or class is needed, add it to this table in the same part.
 | Layout | `app-layout` |
 | Sidebar | `sidebar-heading`, `deck-item` |
 | Deck header | `deck-header`, `deck-actions` |
-| Stats | `stats-list`, `stat` |
+| Stats | `stats-list`, `stat`, `stats-progress` (wrapper for the progress label and bar) |
 | Toolbar | `toolbar`, `search-group`, `toolbar-actions` |
 | Card list | `card-item`, `card-text`, `card-side`, `card-label`, `card-text-value`, `card-actions` |
 
@@ -346,7 +346,10 @@ Shown in `#deck-stats` for the active deck, computed from state each render (nev
 - Due now
 - New (reviewCount is 0)
 - Total reviews (sum of reviewCount)
-- Last studied (formatted date, or "Not studied yet")
+- Last studied: "Today", "Yesterday", a `toLocaleDateString()` date, or "Not studied yet"
+- Progress: a native `<progress>` (value = cards with interval of 1 day or more, max = total) with a visible label such as "Learned 6 of 12 cards (50%)". For an empty deck, show "Add cards to start tracking progress." instead
+
+Stats ignore the search query and are hidden when no deck is active.
 
 ### 9.8 Import and export
 

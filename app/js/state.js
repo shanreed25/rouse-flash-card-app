@@ -52,6 +52,20 @@ export function getDueCards() {
     return getVisibleCards().filter((card) => isDue(card, now));
 }
 
+// Stats for a whole deck (ignores search). Read-only: returns a new object and never saves.
+export function getDeckStats(deckId, now) {
+    const cards = state.cardsByDeckId[deckId] || [];
+    const deck = state.decks.find((item) => item.id === deckId);
+    return {
+        total: cards.length,
+        dueNow: cards.filter((card) => isDue(card, now)).length,
+        newCards: cards.filter((card) => card.reviewCount === 0).length,
+        learned: cards.filter((card) => card.interval >= 1).length,
+        totalReviews: cards.reduce((sum, card) => sum + card.reviewCount, 0),
+        lastStudiedAt: deck ? deck.lastStudiedAt : null
+    };
+}
+
 // Copies the scheduling fields from rateCard() onto the card and saves.
 // Returns the applied fields, or null if the card was not found.
 export function applyRating(deckId, cardId, rating) {

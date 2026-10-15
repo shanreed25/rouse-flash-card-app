@@ -443,6 +443,11 @@ function handleDecksToggle() {
 function init() {
     render();
 
+    // Catches up "Due now" and the Review due count if cards became due while the tab was hidden.
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") render();
+    });
+
     document.getElementById("deck-list").addEventListener("click", handleDeckListClick);
     document.getElementById("new-deck-btn").addEventListener("click", (event) => {
         openDeckModal("create", event.currentTarget);

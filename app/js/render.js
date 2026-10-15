@@ -1,4 +1,4 @@
-import { state, ui, getActiveDeck, getActiveCards, getVisibleCards, getDueCards } from "./state.js";
+import { state, ui, getActiveDeck, getActiveCards, getVisibleCards, getDueCards, getDeckStats } from "./state.js";
 import { getCurrentCard, isSessionOver } from "./study.js";
 import { rateCard, getNextDueDate, formatInterval, RATINGS } from "./srs.js";
 
@@ -20,6 +20,80 @@ export function render() {
     renderToolbar();
     renderCardList();
     renderStudy();
+    renderStats();
+}
+
+function formatLastStudied(timestamp, now) {
+    if (timestamp === null) return "Not studied yet";
+    const studied = new Date(timestamp);
+    const today = new Date(now);
+    if (studied.toDateString() === today.toDateString()) return "Today";
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (studied.toDateString() === yesterday.toDateString()) return "Yesterday";
+    return studied.toLocaleDateString();
+}
+
+function createStat(label, value) {
+    const stat = document.createElement("div");
+    stat.className = "stat";
+
+    const term = document.createElement("dt");
+    term.textContent = label;
+
+    const description = document.createElement("dd");
+    description.textContent = String(value);
+
+    stat.append(term, description);
+    return stat;
+}
+
+// Recalculated from saved cards on every render. Never stored, and ignores the search.
+export function renderStats() {
+    const section = document.getElementById("deck-stats");
+    const deck = getActiveDeck();
+    section.hidden = deck === null;
+    section.replaceChildren();
+    if (deck === null) return;
+
+    const now = Date.now();
+    const stats = getDeckStats(deck.id, now);
+
+    const list = document.createElement("dl");
+    list.className = "stats-list";
+    list.append(
+        createStat("Total cards", stats.total),
+        createStat("Due now", stats.dueNow),
+        createStat("New", stats.newCards),
+        createStat("Total reviews", stats.totalReviews),
+        createStat("Last studied", formatLastStudied(stats.lastStudiedAt, now))
+    );
+
+    const progress = document.createElement("div");
+    progress.className = "stats-progress";
+
+    if (stats.total === 0) {
+        const message = document.createElement("p");
+        message.id = "stats-empty";
+        message.textContent = "Add cards to start tracking progress.";
+        progress.append(message);
+    } else {
+        const percent = Math.round((stats.learned / stats.total) * 100);
+
+        const label = document.createElement("label");
+        label.id = "stats-progress-label";
+        label.htmlFor = "stats-progress";
+        label.textContent = `Learned ${stats.learned} of ${stats.total} cards (${percent}%)`;
+
+        const bar = document.createElement("progress");
+        bar.id = "stats-progress";
+        bar.max = stats.total;
+        bar.value = stats.learned;
+
+        progress.append(label, bar);
+    }
+
+    section.append(list, progress);
 }
 
 function shortenForLabel(text) {
