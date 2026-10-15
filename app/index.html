@@ -118,6 +118,30 @@
     <div id="status-message" class="visually-hidden" aria-live="polite"></div>
     <div id="error-message" class="visually-hidden" aria-live="assertive"></div>
 
+    <dialog id="deck-modal" aria-labelledby="deck-modal-title">
+        <form id="deck-form" novalidate>
+            <h2 id="deck-modal-title">New Deck</h2>
+            <div class="form-field">
+                <label for="deck-name-input">Deck name</label>
+                <input type="text" id="deck-name-input" autocomplete="off" aria-describedby="deck-name-error">
+                <p id="deck-name-error" class="field-error" hidden></p>
+            </div>
+            <div class="dialog-actions">
+                <button type="button" id="deck-cancel-btn">Cancel</button>
+                <button type="submit" id="deck-save-btn">Create</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="confirm-modal" aria-labelledby="confirm-modal-title">
+        <h2 id="confirm-modal-title">Please confirm</h2>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+            <button type="button" id="confirm-cancel-btn">Cancel</button>
+            <button type="button" id="confirm-ok-btn">Delete</button>
+        </div>
+    </dialog>
+
     <script type="module" src="js/app.js"></script>
 </body>
 </html>

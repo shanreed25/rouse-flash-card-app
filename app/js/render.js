@@ -46,4 +46,9 @@ export function renderSidebar() {
 export function renderDeckHeader() {
     const deck = getActiveDeck();
     document.getElementById("deck-title").textContent = deck ? deck.name : "No deck selected";
+
+    const hasNoDeck = deck === null;
+    document.getElementById("edit-deck-btn").disabled = hasNoDeck;
+    document.getElementById("delete-deck-btn").disabled = hasNoDeck;
+    document.getElementById("export-deck-btn").disabled = hasNoDeck;
 }

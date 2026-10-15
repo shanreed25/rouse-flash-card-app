@@ -56,9 +56,7 @@ function fillDeckDefaults(deck) {
     return {
         ...deck,
         updatedAt: isNumber(deck.updatedAt) ? deck.updatedAt : deck.createdAt,
-        lastStudiedAt: isNumberOrNull(deck.lastStudiedAt) && deck.lastStudiedAt !== undefined
-            ? deck.lastStudiedAt
-            : null
+        lastStudiedAt: isNumberOrNull(deck.lastStudiedAt) ? deck.lastStudiedAt : null
     };
 }
 
@@ -70,9 +68,7 @@ function fillCardDefaults(card) {
         interval: isNumber(card.interval) ? card.interval : 0,
         reviewCount: isNumber(card.reviewCount) ? card.reviewCount : 0,
         lapses: isNumber(card.lapses) ? card.lapses : 0,
-        lastReviewedAt: isNumberOrNull(card.lastReviewedAt) && card.lastReviewedAt !== undefined
-            ? card.lastReviewedAt
-            : null
+        lastReviewedAt: isNumberOrNull(card.lastReviewedAt) ? card.lastReviewedAt : null
     };
 }
 
