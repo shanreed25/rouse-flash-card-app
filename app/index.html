@@ -87,14 +87,14 @@
                         <span id="study-back" class="card-face card-face--back"></span>
                     </button>
                     <div class="study-controls">
-                        <button type="button" id="prev-btn">Previous</button>
-                        <button type="button" id="flip-btn">Show answer</button>
-                        <button type="button" id="next-btn">Next</button>
+                        <button type="button" id="prev-btn" aria-keyshortcuts="ArrowLeft">Previous</button>
+                        <button type="button" id="flip-btn" aria-keyshortcuts="Space">Show answer</button>
+                        <button type="button" id="next-btn" aria-keyshortcuts="ArrowRight">Next</button>
                     </div>
                     <div id="rating-controls" hidden>
-                        <button type="button" id="again-btn">Again</button>
-                        <button type="button" id="good-btn">Good</button>
-                        <button type="button" id="easy-btn">Easy</button>
+                        <button type="button" id="again-btn" aria-keyshortcuts="1">Again</button>
+                        <button type="button" id="good-btn" aria-keyshortcuts="2">Good</button>
+                        <button type="button" id="easy-btn" aria-keyshortcuts="3">Easy</button>
                     </div>
                 </div>
                 <div id="study-empty" hidden>
@@ -106,7 +106,13 @@
     </div>
 
     <footer id="app-footer">
-        <p>Keyboard shortcuts in study view: Space flips the card. Arrow Left and Arrow Right move between cards.</p>
+        <p>
+            <kbd>Space</kbd> flips the card.
+            <kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd> move between cards.
+            <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> rate the card after flipping.
+            <kbd>Esc</kbd> closes dialogs.
+            <kbd>Ctrl</kbd>+<kbd>Enter</kbd> (<kbd>Cmd</kbd>+<kbd>Enter</kbd> on Mac) saves a card.
+        </p>
     </footer>
 
     <div id="status-message" class="visually-hidden" aria-live="polite"></div>

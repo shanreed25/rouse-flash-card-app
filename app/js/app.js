@@ -1,5 +1,6 @@
 import {
     state,
+    ui,
     getActiveDeck,
     getActiveCards,
     setActiveDeck,
@@ -15,7 +16,7 @@ import {
 } from "./state.js";
 import { render } from "./render.js";
 import { startSession, endSession, flip, next, prev, shuffle, syncSession } from "./study.js";
-import { openModal, closeModal, confirmAction } from "./modal.js";
+import { openModal, closeModal, confirmAction, isModalOpen } from "./modal.js";
 
 const deckModal = document.getElementById("deck-modal");
 const deckForm = document.getElementById("deck-form");
@@ -304,6 +305,42 @@ function handleStudyAction(action) {
     render();
 }
 
+// Placeholder. Part 8 adds the scheduling logic.
+function rateCurrentCard(rating) {}
+
+const KEY_ACTIONS = {
+    " ": flip,
+    ArrowRight: next,
+    ArrowLeft: prev
+};
+
+const KEY_RATINGS = { "1": "again", "2": "good", "3": "easy" };
+
+function handleKeydown(event) {
+    if (ui.view !== "study" && ui.view !== "review") return;
+    if (isModalOpen()) return;
+    if (event.ctrlKey || event.altKey || event.metaKey) return;
+
+    const target = event.target;
+    if (target.closest("input, textarea, select, [contenteditable]")) return;
+
+    const isSpace = event.key === " ";
+    if (isSpace && (target.closest("button, a") || event.repeat)) return;
+
+    const action = KEY_ACTIONS[event.key];
+    if (action) {
+        event.preventDefault();
+        handleStudyAction(action);
+        return;
+    }
+
+    const rating = KEY_RATINGS[event.key];
+    if (rating && ui.study.isFlipped) {
+        event.preventDefault();
+        handleStudyAction(() => rateCurrentCard(rating));
+    }
+}
+
 function handleDecksToggle() {
     const isOpen = deckSidebar.classList.toggle("is-open");
     decksToggleBtn.setAttribute("aria-expanded", String(isOpen));
@@ -340,6 +377,8 @@ function init() {
     document.getElementById("prev-btn").addEventListener("click", () => handleStudyAction(prev));
     document.getElementById("next-btn").addEventListener("click", () => handleStudyAction(next));
     document.getElementById("shuffle-btn").addEventListener("click", () => handleStudyAction(shuffle));
+
+    document.addEventListener("keydown", handleKeydown);
 }
 
 init();
