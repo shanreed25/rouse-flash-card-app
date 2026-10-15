@@ -218,6 +218,20 @@ main > section + section {
     color: var(--color-accent-text);
 }
 
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+}
+
+#empty-new-deck-btn {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-text);
+}
+
 /* Deck header */
 .deck-header {
     display: flex;

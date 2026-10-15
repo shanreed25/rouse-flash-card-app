@@ -165,7 +165,7 @@ Rules that keep the version 2 swap small:
 | Area | IDs |
 | --- | --- |
 | Header | `app-header`, `new-deck-btn` |
-| Sidebar | `deck-sidebar`, `deck-list`, `decks-toggle-btn` (mobile only), `decks-heading` |
+| Sidebar | `deck-sidebar`, `deck-list`, `decks-toggle-btn` (mobile only), `decks-heading`, `empty-new-deck-btn` (deck empty state) |
 | Deck header | `deck-title`, `edit-deck-btn`, `delete-deck-btn`, `export-deck-btn`, `import-deck-btn`, `import-file-input` |
 | Stats | `deck-stats` |
 | Toolbar | `search-input`, `match-count`, `new-card-btn`, `study-btn`, `review-btn`, `manage-btn`, `shuffle-btn` |
@@ -183,6 +183,7 @@ If a new ID or class is needed, add it to this table in the same part.
 | --- | --- |
 | Utility | `visually-hidden` |
 | State | `is-active` (see section 7 for other `is-` classes) |
+| Empty state | `empty-state` |
 | Header | `app-name` |
 | Layout | `app-layout` |
 | Sidebar | `sidebar-heading`, `deck-item` |
