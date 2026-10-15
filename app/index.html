@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="app-header">
+        <h1 class="app-name">Flashcards</h1>
+        <button type="button" id="new-deck-btn">New Deck</button>
+    </header>
+
+    <div class="app-layout">
+        <button type="button" id="decks-toggle-btn" aria-expanded="false" aria-controls="deck-sidebar">Decks</button>
+
+        <aside id="deck-sidebar">
+            <nav aria-labelledby="decks-heading">
+                <h2 id="decks-heading" class="sidebar-heading">Decks</h2>
+                <div id="deck-list">
+                    <button type="button" class="deck-item is-active" aria-current="true" data-action="select-deck" data-id="deck-1">Spanish Verbs</button>
+                    <button type="button" class="deck-item" data-action="select-deck" data-id="deck-2">World Capitals</button>
+                    <button type="button" class="deck-item" data-action="select-deck" data-id="deck-3">JavaScript Basics</button>
+                </div>
+            </nav>
+        </aside>
+
+        <main>
+            <section class="deck-header" aria-labelledby="deck-title">
+                <h2 id="deck-title">Spanish Verbs</h2>
+                <div class="deck-actions">
+                    <button type="button" id="edit-deck-btn">Edit</button>
+                    <button type="button" id="delete-deck-btn">Delete</button>
+                    <button type="button" id="export-deck-btn">Export</button>
+                    <button type="button" id="import-deck-btn">Import</button>
+                    <input type="file" id="import-file-input" class="visually-hidden" accept=".json,application/json" tabindex="-1" aria-hidden="true">
+                </div>
+            </section>
+
+            <section id="deck-stats" aria-label="Deck statistics">
+                <dl class="stats-list">
+                    <div class="stat">
+                        <dt>Total cards</dt>
+                        <dd>3</dd>
+                    </div>
+                    <div class="stat">
+                        <dt>Due now</dt>
+                        <dd>2</dd>
+                    </div>
+                    <div class="stat">
+                        <dt>New</dt>
+                        <dd>1</dd>
+                    </div>
+                    <div class="stat">
+                        <dt>Total reviews</dt>
+                        <dd>7</dd>
+                    </div>
+                    <div class="stat">
+                        <dt>Last studied</dt>
+                        <dd>Not studied yet</dd>
+                    </div>
+                </dl>
+            </section>
+
+            <section class="toolbar" aria-label="Card tools">
+                <div class="search-group">
+                    <label for="search-input">Search cards</label>
+                    <input type="search" id="search-input" autocomplete="off">
+                    <span id="match-count">3 of 3 cards</span>
+                </div>
+                <div class="toolbar-actions">
+                    <button type="button" id="new-card-btn">New Card</button>
+                    <button type="button" id="manage-btn">Manage</button>
+                    <button type="button" id="study-btn">Study</button>
+                    <button type="button" id="review-btn">Review due (2)</button>
+                </div>
+            </section>
+
+            <section aria-labelledby="cards-heading">
+                <h2 id="cards-heading" class="visually-hidden">Cards</h2>
+                <ul id="card-list">
+                    <li class="card-item">
+                        <div class="card-text">
+                            <p class="card-side"><span class="card-label">Front</span> hablar</p>
+                            <p class="card-side"><span class="card-label">Back</span> to speak</p>
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" data-action="edit-card" data-id="card-1" aria-label="Edit card hablar">Edit</button>
+                            <button type="button" data-action="delete-card" data-id="card-1" aria-label="Delete card hablar">Delete</button>
+                        </div>
+                    </li>
+                    <li class="card-item">
+                        <div class="card-text">
+                            <p class="card-side"><span class="card-label">Front</span> comer</p>
+                            <p class="card-side"><span class="card-label">Back</span> to eat</p>
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" data-action="edit-card" data-id="card-2" aria-label="Edit card comer">Edit</button>
+                            <button type="button" data-action="delete-card" data-id="card-2" aria-label="Delete card comer">Delete</button>
+                        </div>
+                    </li>
+                    <li class="card-item">
+                        <div class="card-text">
+                            <p class="card-side"><span class="card-label">Front</span> vivir</p>
+                            <p class="card-side"><span class="card-label">Back</span> to live</p>
+                        </div>
+                        <div class="card-actions">
+                            <button type="button" data-action="edit-card" data-id="card-3" aria-label="Edit card vivir">Edit</button>
+                            <button type="button" data-action="delete-card" data-id="card-3" aria-label="Delete card vivir">Delete</button>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <footer id="app-footer">
+        <p>Keyboard shortcuts in study view: Space flips the card. Arrow Left and Arrow Right move between cards.</p>
+    </footer>
+
+    <div id="status-message" class="visually-hidden" aria-live="polite"></div>
+    <div id="error-message" class="visually-hidden" aria-live="assertive"></div>
+</body>
+</html>
