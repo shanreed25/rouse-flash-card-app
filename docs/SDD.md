@@ -172,7 +172,7 @@ Rules that keep the version 2 swap small:
 | Card list | `card-list`, `cards-heading` (visually hidden), `empty-new-card-btn` (card empty state), `clear-search-btn` (no-match state) |
 | Study | `study-view`, `study-card`, `study-front`, `study-back`, `study-position`, `flip-btn`, `prev-btn`, `next-btn`, `rating-controls`, `again-btn`, `good-btn`, `easy-btn`, `study-session`, `study-empty`, `study-empty-message`, `study-empty-manage-btn`, `study-end` (end-of-session message), `study-end-message`, `study-again-btn`, `study-end-manage-btn` |
 | Modals | `deck-modal`, `deck-modal-title`, `deck-form`, `deck-name-input`, `deck-name-error`, `deck-cancel-btn`, `deck-save-btn`, `confirm-modal-title`, `card-modal-title`, `card-front-error`, `card-back-error`, `card-form-hint`, `card-cancel-btn`, `card-save-btn`, `card-modal`, `card-form`, `card-front-input`, `card-back-input`, `confirm-modal`, `confirm-message`, `confirm-ok-btn`, `confirm-cancel-btn` |
-| Messages | `status-message` (aria-live polite), `error-message` (aria-live assertive) |
+| Messages | `status-message` (visually hidden, aria-live polite), `error-banner` (visible, dismissible error area), `error-message` (the banner's text, aria-live assertive), `error-dismiss-btn` |
 | Footer | `app-footer` |
 
 If a new ID or class is needed, add it to this table in the same part.
@@ -188,6 +188,7 @@ If a new ID or class is needed, add it to this table in the same part.
 | Empty state | `empty-state` |
 | Header | `app-name` |
 | Layout | `app-layout` |
+| Messages | `error-banner` |
 | Sidebar | `sidebar-heading`, `deck-item` |
 | Deck header | `deck-header`, `deck-actions` |
 | Stats | `stats-list`, `stat`, `stats-progress` (wrapper for the progress label and bar) |
@@ -225,12 +226,14 @@ All colors are CSS variables on `:root`, with dark mode values under `@media (pr
 | `--color-text` | `#1f1b2d` | `#ece9f5` |
 | `--color-text-muted` | `#5b5670` | `#b3adc6` |
 | `--color-border` | `#ddd8ea` | `#3a3548` |
+| `--color-border-strong` | `#7d7793` | `#7a7490` |
 | `--color-accent` | `#6d28d9` | `#c4b5fd` |
 | `--color-accent-text` | `#ffffff` | `#1f1b2d` |
 | `--color-danger` | `#b91c1c` | `#fca5a5` |
 | `--color-focus` | `#6d28d9` | `#c4b5fd` |
 
 - All text and button color pairs must meet WCAG AA contrast (4.5:1 for normal text, 3:1 for large text and UI borders). Verify in Part 11 and adjust values if needed.
+- `--color-border` is for panel and card outlines only. Inputs, textareas, buttons, the progress bar track, and the study card use `--color-border-strong` so their edges meet 3:1 against the background and surface.
 - Focus style: `outline: 3px solid var(--color-focus); outline-offset: 2px;` on `:focus-visible` for every interactive element.
 - Also define spacing, radius, and font variables (`--space-1` through `--space-6`, `--radius`, `--font-body`). Use the system font stack.
 

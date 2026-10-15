@@ -12,6 +12,11 @@
         <button type="button" id="new-deck-btn">New Deck</button>
     </header>
 
+    <div id="error-banner" class="error-banner" hidden>
+        <p id="error-message" aria-live="assertive"></p>
+        <button type="button" id="error-dismiss-btn">Dismiss</button>
+    </div>
+
     <div class="app-layout">
         <button type="button" id="decks-toggle-btn" aria-expanded="false" aria-controls="deck-sidebar">Decks</button>
 
@@ -81,7 +86,7 @@
                 </div>
                 <div id="study-empty" hidden>
                     <p id="study-empty-message">No cards to study.</p>
-                    <button type="button" id="study-empty-manage-btn">Back to Manage</button>
+                    <button type="button" id="study-empty-manage-btn">Back to cards</button>
                 </div>
             </section>
         </main>
@@ -98,7 +103,6 @@
     </footer>
 
     <div id="status-message" class="visually-hidden" aria-live="polite"></div>
-    <div id="error-message" class="visually-hidden" aria-live="assertive"></div>
 
     <dialog id="deck-modal" aria-labelledby="deck-modal-title">
         <form id="deck-form" novalidate>

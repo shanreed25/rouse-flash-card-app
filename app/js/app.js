@@ -47,17 +47,43 @@ const deckSidebar = document.getElementById("deck-sidebar");
 const decksToggleBtn = document.getElementById("decks-toggle-btn");
 const searchInput = document.getElementById("search-input");
 
-function showStatus(message) {
-    document.getElementById("status-message").textContent = message;
+const pendingAnnouncements = new Map();
+
+// Clears the live region first and sets the text on the next frame, so a message that
+// repeats (for example "Card added." twice) is announced again.
+function announce(elementId, message) {
+    const element = document.getElementById(elementId);
+    cancelAnimationFrame(pendingAnnouncements.get(elementId));
+    element.textContent = "";
+    if (message === "") return;
+    pendingAnnouncements.set(
+        elementId,
+        requestAnimationFrame(() => {
+            element.textContent = message;
+        })
+    );
 }
 
+function showStatus(message) {
+    announce("status-message", message);
+}
+
+// Errors are shown in a visible banner that stays until dismissed or the next successful action.
 function showError(message) {
-    document.getElementById("error-message").textContent = message;
+    document.getElementById("error-banner").hidden = message === "";
+    announce("error-message", message);
+}
+
+function handleErrorDismiss() {
+    showError("");
+    document.getElementById("new-deck-btn").focus();
 }
 
 function reportSaveFailure() {
     if (!wasLastSaveSuccessful()) {
         showError("Could not save your changes. Storage may be full or blocked.");
+    } else {
+        showError("");
     }
 }
 
@@ -113,12 +139,12 @@ function handleDeckSubmit(event) {
 
     if (mode === "edit") {
         renameDeck(deckId, trimmed);
-        showStatus(`Deck renamed to ${trimmed}.`);
+        showStatus(`Deck renamed to '${trimmed}'.`);
     } else {
         addDeck(trimmed);
         searchInput.value = "";
         collapseDeckList();
-        showStatus(`Deck ${trimmed} created.`);
+        showStatus(`Deck '${trimmed}' created.`);
     }
 
     closeModal(deckModal);
@@ -155,7 +181,7 @@ async function handleDeleteDeck() {
     deleteDeck(deck.id);
     searchInput.value = "";
     render();
-    showStatus(`Deck ${deck.name} deleted.`);
+    showStatus(`Deck '${deck.name}' deleted.`);
     reportSaveFailure();
     focusAfterDelete(deletedIndex);
 }
@@ -439,6 +465,7 @@ function handleKeydown(event) {
 function handleExport() {
     const deck = getActiveDeck();
     if (!deck) return;
+    showError("");
     exportDeck(deck.id);
     showStatus(`Exported '${deck.name}'.`);
 }
@@ -495,6 +522,7 @@ function init() {
     document.getElementById("export-deck-btn").addEventListener("click", handleExport);
     document.getElementById("import-deck-btn").addEventListener("click", () => importFileInput.click());
     importFileInput.addEventListener("change", handleImportFileChange);
+    document.getElementById("error-dismiss-btn").addEventListener("click", handleErrorDismiss);
 
     document.getElementById("new-card-btn").addEventListener("click", (event) => {
         openCardModal("create", event.currentTarget);

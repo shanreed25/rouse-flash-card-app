@@ -1,10 +1,13 @@
 /* Theme variables (light) */
 :root {
+    color-scheme: light dark;
+
     --color-bg: #faf9fc;
     --color-surface: #ffffff;
     --color-text: #1f1b2d;
     --color-text-muted: #5b5670;
     --color-border: #ddd8ea;
+    --color-border-strong: #7d7793;
     --color-accent: #6d28d9;
     --color-accent-text: #ffffff;
     --color-danger: #b91c1c;
@@ -29,6 +32,7 @@
         --color-text: #ece9f5;
         --color-text-muted: #b3adc6;
         --color-border: #3a3548;
+        --color-border-strong: #7a7490;
         --color-accent: #c4b5fd;
         --color-accent-text: #1f1b2d;
         --color-danger: #fca5a5;
@@ -83,23 +87,39 @@ button {
     min-height: 44px;
     min-width: 44px;
     padding: var(--space-2) var(--space-4);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-surface);
     cursor: pointer;
 }
 
-button:hover {
+button:hover:not(:disabled) {
     border-color: var(--color-accent);
+}
+
+/* Filled buttons already use the accent as their border, so hover darkens the fill instead. */
+#new-deck-btn:hover:not(:disabled),
+#empty-new-deck-btn:hover:not(:disabled),
+#new-card-btn:hover:not(:disabled),
+#empty-new-card-btn:hover:not(:disabled),
+#deck-save-btn:hover:not(:disabled),
+#card-save-btn:hover:not(:disabled),
+.deck-item.is-active:hover:not(:disabled) {
+    filter: brightness(0.92);
 }
 
 input[type="search"],
 input[type="text"] {
     min-height: 44px;
     padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-surface);
+}
+
+input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 :focus-visible {
@@ -138,6 +158,25 @@ input[type="text"] {
     background: var(--color-accent);
     border-color: var(--color-accent);
     color: var(--color-accent-text);
+}
+
+/* Error banner */
+.error-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-danger);
+    background: var(--color-surface);
+    border-bottom: 2px solid var(--color-danger);
+}
+
+#error-message {
+    flex: 1 1 12rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 /* Layout */
@@ -301,7 +340,7 @@ main > section + section {
     height: 0.75rem;
     accent-color: var(--color-accent);
     appearance: none;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius);
     background: var(--color-bg);
     overflow: hidden;
@@ -415,7 +454,7 @@ dialog {
 }
 
 dialog::backdrop {
-    background: color-mix(in srgb, var(--color-text) 50%, transparent);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 dialog h2 {
@@ -446,7 +485,7 @@ dialog h2 {
     font: inherit;
     color: inherit;
     background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     border-radius: var(--radius);
     resize: vertical;
 }
@@ -546,7 +585,7 @@ button:disabled {
     display: grid;
     width: min(32rem, 100%);
     padding: 0;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-border-strong);
     background: transparent;
     color: var(--color-text);
     font: inherit;
