@@ -67,6 +67,7 @@
                 </div>
                 <div class="toolbar-actions">
                     <button type="button" id="new-card-btn">New Card</button>
+                    <button type="button" id="shuffle-btn" hidden>Shuffle</button>
                     <button type="button" id="manage-btn">Manage</button>
                     <button type="button" id="study-btn">Study</button>
                     <button type="button" id="review-btn">Review due (2)</button>
@@ -76,6 +77,30 @@
             <section aria-labelledby="cards-heading">
                 <h2 id="cards-heading" class="visually-hidden">Cards</h2>
                 <ul id="card-list"></ul>
+            </section>
+
+            <section id="study-view" aria-label="Study" hidden>
+                <div id="study-session">
+                    <p id="study-position"></p>
+                    <button type="button" id="study-card">
+                        <span id="study-front" class="card-face card-face--front"></span>
+                        <span id="study-back" class="card-face card-face--back"></span>
+                    </button>
+                    <div class="study-controls">
+                        <button type="button" id="prev-btn">Previous</button>
+                        <button type="button" id="flip-btn">Show answer</button>
+                        <button type="button" id="next-btn">Next</button>
+                    </div>
+                    <div id="rating-controls" hidden>
+                        <button type="button" id="again-btn">Again</button>
+                        <button type="button" id="good-btn">Good</button>
+                        <button type="button" id="easy-btn">Easy</button>
+                    </div>
+                </div>
+                <div id="study-empty" hidden>
+                    <p>No cards to study.</p>
+                    <button type="button" id="study-empty-manage-btn">Back to Manage</button>
+                </div>
             </section>
         </main>
     </div>

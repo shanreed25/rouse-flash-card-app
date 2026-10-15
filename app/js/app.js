@@ -14,6 +14,7 @@ import {
     wasLastSaveSuccessful
 } from "./state.js";
 import { render } from "./render.js";
+import { startSession, endSession, flip, next, prev, shuffle, syncSession } from "./study.js";
 import { openModal, closeModal, confirmAction } from "./modal.js";
 
 const deckModal = document.getElementById("deck-modal");
@@ -226,6 +227,7 @@ function handleCardSubmit(event) {
     }
 
     closeModal(cardModal);
+    syncSession();
     render();
     reportSaveFailure();
 
@@ -276,11 +278,30 @@ async function handleCardListClick(event) {
         if (!confirmed) return;
 
         deleteCard(deck.id, cardId);
+        syncSession();
         render();
         showStatus("Card deleted.");
         reportSaveFailure();
         focusAfterCardDelete(cardIndex);
     }
+}
+
+function handleStudyStart() {
+    startSession();
+    render();
+    document.getElementById("study-card").focus();
+    reportSaveFailure();
+}
+
+function handleStudyEnd() {
+    endSession();
+    render();
+    document.getElementById("study-btn").focus();
+}
+
+function handleStudyAction(action) {
+    action();
+    render();
 }
 
 function handleDecksToggle() {
@@ -310,6 +331,15 @@ function init() {
     cardForm.addEventListener("submit", handleCardSubmit);
     cardForm.addEventListener("keydown", handleCardFormKeydown);
     document.getElementById("card-cancel-btn").addEventListener("click", () => closeModal(cardModal));
+
+    document.getElementById("study-btn").addEventListener("click", handleStudyStart);
+    document.getElementById("manage-btn").addEventListener("click", handleStudyEnd);
+    document.getElementById("study-empty-manage-btn").addEventListener("click", handleStudyEnd);
+    document.getElementById("study-card").addEventListener("click", () => handleStudyAction(flip));
+    document.getElementById("flip-btn").addEventListener("click", () => handleStudyAction(flip));
+    document.getElementById("prev-btn").addEventListener("click", () => handleStudyAction(prev));
+    document.getElementById("next-btn").addEventListener("click", () => handleStudyAction(next));
+    document.getElementById("shuffle-btn").addEventListener("click", () => handleStudyAction(shuffle));
 }
 
 init();

@@ -170,7 +170,7 @@ Rules that keep the version 2 swap small:
 | Stats | `deck-stats` |
 | Toolbar | `search-input`, `match-count`, `new-card-btn`, `study-btn`, `review-btn`, `manage-btn`, `shuffle-btn` |
 | Card list | `card-list`, `cards-heading` (visually hidden), `empty-new-card-btn` (card empty state) |
-| Study | `study-view`, `study-card`, `study-front`, `study-back`, `study-position`, `flip-btn`, `prev-btn`, `next-btn`, `rating-controls`, `again-btn`, `good-btn`, `easy-btn` |
+| Study | `study-view`, `study-card`, `study-front`, `study-back`, `study-position`, `flip-btn`, `prev-btn`, `next-btn`, `rating-controls`, `again-btn`, `good-btn`, `easy-btn`, `study-session`, `study-empty`, `study-empty-manage-btn` |
 | Modals | `deck-modal`, `deck-modal-title`, `deck-form`, `deck-name-input`, `deck-name-error`, `deck-cancel-btn`, `deck-save-btn`, `confirm-modal-title`, `card-modal-title`, `card-front-error`, `card-back-error`, `card-form-hint`, `card-cancel-btn`, `card-save-btn`, `card-modal`, `card-form`, `card-front-input`, `card-back-input`, `confirm-modal`, `confirm-message`, `confirm-ok-btn`, `confirm-cancel-btn` |
 | Messages | `status-message` (aria-live polite), `error-message` (aria-live assertive) |
 | Footer | `app-footer` |
@@ -182,7 +182,8 @@ If a new ID or class is needed, add it to this table in the same part.
 | Area | Classes |
 | --- | --- |
 | Utility | `visually-hidden` |
-| State | `is-active`, `is-open` (mobile deck list expanded) (see section 7 for other `is-` classes) |
+| State | `is-active`, `is-open` (mobile deck list expanded), `is-flipped` (study card showing its back), `no-transition` (suppresses the flip animation while the card changes) (see section 7 for other `is-` classes) |
+| Study | `card-face`, `card-face--front`, `card-face--back`, `study-controls` |
 | Modals and forms | `dialog-actions`, `form-field`, `field-error`, `form-hint` |
 | Empty state | `empty-state` |
 | Header | `app-name` |

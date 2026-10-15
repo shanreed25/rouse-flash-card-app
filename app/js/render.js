@@ -1,11 +1,16 @@
-import { state, getActiveDeck, getActiveCards } from "./state.js";
+import { state, ui, getActiveDeck, getActiveCards } from "./state.js";
+import { getCurrentCard } from "./study.js";
 
 const LABEL_PREVIEW_LENGTH = 30;
+
+let lastRenderedCardId = null;
+let lastAnnouncedCardId = null;
 
 export function render() {
     renderSidebar();
     renderDeckHeader();
     renderCardList();
+    renderStudy();
 }
 
 function shortenForLabel(text) {
@@ -132,4 +137,57 @@ export function renderDeckHeader() {
     document.getElementById("edit-deck-btn").disabled = hasNoDeck;
     document.getElementById("delete-deck-btn").disabled = hasNoDeck;
     document.getElementById("export-deck-btn").disabled = hasNoDeck;
+}
+
+export function renderStudy() {
+    const isStudy = ui.view === "study";
+    const studyCard = document.getElementById("study-card");
+
+    document.getElementById("card-list").hidden = isStudy;
+    document.getElementById("cards-heading").hidden = isStudy;
+    document.getElementById("study-view").hidden = !isStudy;
+    document.getElementById("shuffle-btn").hidden = !isStudy;
+    document.getElementById("manage-btn").setAttribute("aria-pressed", String(!isStudy));
+    document.getElementById("study-btn").setAttribute("aria-pressed", String(isStudy));
+    document.getElementById("study-btn").disabled = getActiveCards().length === 0;
+
+    const card = isStudy ? getCurrentCard() : null;
+    document.getElementById("study-session").hidden = card === null;
+    document.getElementById("study-empty").hidden = !isStudy || card !== null;
+
+    if (card === null) {
+        lastRenderedCardId = null;
+        lastAnnouncedCardId = null;
+        return;
+    }
+
+    const isFlipped = ui.study.isFlipped;
+    const front = document.getElementById("study-front");
+    const back = document.getElementById("study-back");
+    front.textContent = card.front;
+    back.textContent = card.back;
+    front.setAttribute("aria-hidden", String(isFlipped));
+    back.setAttribute("aria-hidden", String(!isFlipped));
+
+    if (card.id === lastRenderedCardId) {
+        studyCard.classList.toggle("is-flipped", isFlipped);
+    } else {
+        studyCard.classList.add("no-transition");
+        studyCard.classList.toggle("is-flipped", isFlipped);
+        void studyCard.offsetWidth;
+        studyCard.classList.remove("no-transition");
+        lastRenderedCardId = card.id;
+    }
+
+    const total = ui.study.order.length;
+    const position = `Card ${ui.study.index + 1} of ${total}`;
+    document.getElementById("study-position").textContent = position;
+    document.getElementById("prev-btn").disabled = ui.study.index === 0;
+    document.getElementById("next-btn").disabled = ui.study.index >= total - 1;
+    document.getElementById("flip-btn").textContent = isFlipped ? "Show question" : "Show answer";
+
+    if (card.id !== lastAnnouncedCardId) {
+        document.getElementById("status-message").textContent = position;
+        lastAnnouncedCardId = card.id;
+    }
 }

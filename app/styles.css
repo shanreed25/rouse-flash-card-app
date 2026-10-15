@@ -474,3 +474,93 @@ button:disabled {
     background: var(--color-surface);
     border-top: 1px solid var(--color-border);
 }
+
+/* Study view and flip animation */
+#study-view {
+    perspective: 1000px;
+}
+
+#study-session {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+#study-position {
+    margin: 0;
+    color: var(--color-text-muted);
+}
+
+#study-card {
+    display: grid;
+    width: min(32rem, 100%);
+    padding: 0;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text);
+    font: inherit;
+    text-align: center;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 400ms;
+}
+
+#study-card.is-flipped {
+    transform: rotateY(180deg);
+}
+
+#study-card.no-transition {
+    transition: none;
+}
+
+/* Both faces share one grid cell, so the card is as tall as the longer text. */
+.card-face {
+    display: block;
+    grid-area: 1 / 1;
+    padding: var(--space-6) var(--space-4);
+    background: var(--color-surface);
+    border-radius: var(--radius);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.card-face--back {
+    transform: rotateY(180deg);
+}
+
+.study-controls,
+#rating-controls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-2);
+}
+
+#study-empty {
+    text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #study-card,
+    #study-card.is-flipped {
+        transition: none;
+        transform: none;
+    }
+
+    .card-face--back,
+    #study-card:not(.is-flipped) .card-face--back,
+    #study-card.is-flipped .card-face--front {
+        visibility: hidden;
+    }
+
+    .card-face--back {
+        transform: none;
+    }
+
+    #study-card.is-flipped .card-face--back {
+        visibility: visible;
+    }
+}

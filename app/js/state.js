@@ -161,3 +161,10 @@ export function deleteDeck(deckId) {
     }
     save();
 }
+
+export function markDeckStudied(deckId) {
+    const deck = state.decks.find((item) => item.id === deckId);
+    if (!deck) return;
+    deck.lastStudiedAt = Date.now();
+    save();
+}
